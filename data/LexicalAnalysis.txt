@@ -1,0 +1,18 @@
+main:
+    /*
+        ≤‚ ‘
+    */
+    integer abc=1;
+    bool flag=0;
+    switch(abc){
+        case: 1
+            //≤‚ ‘
+            flag=1;
+            break;
+        default:
+            break;
+    }
+    &
+    if(flag!=0){
+        integer 1abc=10;
+    }
