@@ -30,6 +30,8 @@ public:
     DFA minimizeDFA();
     void printDFA() const;
 private:
+    void makeDFAComplete();
+
     std::vector<std::set<int>> initSet();
     bool couldSub(const std::vector<std::set<int>>& set,const std::set<int>& s, int index) const;
     int findBelongSet(const std::vector<std::set<int>>& set, int value) const;

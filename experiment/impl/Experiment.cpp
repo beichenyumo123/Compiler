@@ -38,10 +38,12 @@ void Experiment::experiment2() {
     //auto pair=Utils::readNFAFile(std::ifstream(filePath));
     //NFA nfa=Utils::mergeNFA(pair.first,pair.second);
     //nfa.printNFA();
+
     NFA nfa(filePath);
-    //nfa.printNFA();
+    nfa.printNFA();
     DFA dfa=nfa.determineNFA();//minimizeDFA();
 
+    dfa.printDFA();
 
     //dfa.printDFA();
     DFA d=dfa.minimizeDFA();

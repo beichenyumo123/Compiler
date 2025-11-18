@@ -186,6 +186,9 @@ NFA NFA::buildFromFile(const std::string &filePath) {
             //文件指针移动到最开始，确保读取的一致性
             file.seekg(0, std::ios::beg);
             auto pair=Utils::readNFAFile(std::move(file));
+            // for (int i=0;i<pair.second;i++) {
+            //     pair.first[i].printNFA();
+            // }
             return Utils::mergeNFA(pair.first,pair.second);
         }
         else {

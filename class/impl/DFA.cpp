@@ -10,8 +10,20 @@
 
 using namespace std;
 
+void DFA::makeDFAComplete() {
+    for (int state:states) {
+        for (char c:chars) {
+            auto it=transitions.find({state,c});
+            if (it==transitions.end()) {
+                transitions[{state,c}]= {DEAD_STATE};
+            }
+        }
+    }
+}
 
 DFA DFA::minimizeDFA() {
+    makeDFAComplete();
+
     vector<set<int>> set=initSet();
     bool flag=false;
     while (!flag) {
@@ -167,6 +179,7 @@ void DFA::printDFA() const{
     for (char c : chars) cout << c << " ";
     cout << "\n×ª»»¹æÔò: " << endl;
     for (const auto& entry : transitions) {
+        if (entry.second==DEAD_STATE) continue;
         cout << "(" << entry.first.first << ", '" << entry.first.second << "') ¡ú ";
         cout << entry.second << " ";
         cout << endl;

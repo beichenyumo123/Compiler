@@ -21,6 +21,7 @@ static constexpr int AND=-8;
 static constexpr int CLOSURE=-9;
 static constexpr int LEFT_BRACKET=-10;
 static constexpr int RIGHT_BRACKET=-11;
+static constexpr int DEAD_STATE=-12;
 
 struct PairHash {
     std::size_t operator()(const std::pair<int, char>& p) const {
