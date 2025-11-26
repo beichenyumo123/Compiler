@@ -14,7 +14,7 @@ add_executable(Compiler main.cpp
         class/DFA.h
         utils/impl/Utils.cpp
         utils/Utils.h
-        constant/Comon.h
+        constant/Common.h
         test/Test.cpp
         test/Test.h
         experiment/impl/Experiment.cpp
@@ -22,4 +22,9 @@ add_executable(Compiler main.cpp
         class/impl/RE.cpp
         class/RE.h
         enumeration/TokenType.h
+        class/impl/Grammar.cpp
+        class/Grammar.h
+        utils/impl/GrammarUtils.cpp
+        utils/GrammarUtils.h
+        constant/GrammarCommon.h
 )

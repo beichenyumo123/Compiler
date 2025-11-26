@@ -11,6 +11,7 @@ public:
     static void experiment1();
     static void experiment2();
     static void experiment3();
+    static void experiment4();
 };
 
 

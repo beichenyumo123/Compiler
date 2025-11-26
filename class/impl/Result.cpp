@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <ostream>
-#include "../../constant/Comon.h"
+#include "../../constant/Common.h"
 
 // Result::Result(TokenType syn, const std::string &token, int sum) {
 //     this->syn=syn; this->token=token; this->sum=sum;

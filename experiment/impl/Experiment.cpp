@@ -8,6 +8,7 @@
 
 #include "../../class/RE.h"
 #include "../../LexicalAnalysis/LexicalAnalysis.h"
+#include "../../class/Grammar.h"
 
 
 //D:\Clion\Compiler\data\LexicalAnalysis.txt
@@ -42,12 +43,12 @@ void Experiment::experiment2() {
     NFA nfa(filePath);
     nfa.printNFA();
     DFA dfa=nfa.determineNFA();//minimizeDFA();
-
+    std::cout<<"----------NFA确定化结果----------\n"<<std::endl;
     dfa.printDFA();
 
     //dfa.printDFA();
     DFA d=dfa.minimizeDFA();
-
+    std::cout<<"----------DFA最小化结果----------\n"<<std::endl;
     d.printDFA();
     std::cout<<"\n----------Experiment2 END----------\n";
     //system("pause");
@@ -76,4 +77,14 @@ void Experiment::experiment3() {
     std::cout<<"\n----------Experiment3 END----------\n";
     //system("pause");
 }
+
+void Experiment::experiment4() {
+    std::cout<<"\n----------Experiment4----------"<<std::endl;
+    Grammar grammar(R"(D:\Clion\Compiler\data\GrammarTest.txt)");
+    grammar.printFirstSet();
+    grammar.printFollowSet();
+    grammar.printSelectSet();
+    std::cout<<"\n----------Experiment4 END----------\n";
+}
+
 

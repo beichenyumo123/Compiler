@@ -8,7 +8,7 @@
 #include <fstream>
 #include <vector>
 
-#include "../../constant/Comon.h"
+#include "../../constant/Common.h"
 #include "../../class/Result.h"
 using namespace std;
 

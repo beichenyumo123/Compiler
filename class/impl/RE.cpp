@@ -8,7 +8,7 @@
 #include <ostream>
 #include <stack>
 
-#include "../../constant/Comon.h"
+#include "../../constant/Common.h"
 #include "../../utils/Utils.h"
 
 NFA RE::transformReToNFA() {

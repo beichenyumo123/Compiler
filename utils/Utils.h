@@ -5,7 +5,7 @@
 #ifndef COMPILER_UTILS_H
 #define COMPILER_UTILS_H
 #include "../class/NFA.h"
-#include "../constant/Comon.h"
+#include "../constant/Common.h"
 #include <stack>
 
 class Utils {
@@ -16,7 +16,7 @@ public:
 
     static std::pair<NFA*,int> readNFAFile(std::ifstream file);
 
-    //单个状态经过字符c得到的状态集合
+    //?????????????c???????????
     template<typename TransitionType>
     static std::list<int> getNextByChar(int status,char c,const TransitionType& transitions) {
         auto it=transitions.find({status,c});
@@ -27,7 +27,7 @@ public:
         return {};
     }
 
-    //状态集合经过字符c得到的状态集合
+    //????????????c???????????
     template<typename TransitionType>
     static std::set<int> getNextByCharOfSet(const std::set<int> &status,char c,const TransitionType& transitions) {
         std::set<int> result={};
@@ -40,7 +40,7 @@ public:
         return result;
     }
 
-        //状态集合的ε-闭包
+        //????????-???
     template<typename TransitionType>
     static std::set<int> getEpsilonClosureOfSet(const std::set<int>& status, const TransitionType &transitions) {
         std::set<int> result={};
@@ -54,7 +54,7 @@ public:
         return result;
     }
 
-    //状态集合经过字符c后的ε-闭包
+    //????????????c????-???
     template<typename TransitionType>
     static std::set<int> getEpsilonClosureOfSetAfterGetNextByCharOfSet(const std::set<int> &status,char c,const TransitionType& transitions) {
         return getEpsilonClosureOfSet(getNextByCharOfSet(status,c,transitions),transitions);
@@ -86,12 +86,12 @@ private:
         return result;
     }
 
-    // 重载版本1：处理 int
+    // ????汾1?????? int
     static std::list<int> convertToStateList(int value) {
         return {value};
     }
 
-    // 重载版本2：处理 std::list<int>
+    // ????汾2?????? std::list<int>
     static std::list<int> convertToStateList(const std::list<int>& value) {
         return value;
     }
