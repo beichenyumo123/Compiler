@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "../../constant/Common.h"
-#include "../../class/Result.h"
+#include "../Result.h"
 using namespace std;
 
 bool LexicalAnalysis::input(const std::string& filePath) {

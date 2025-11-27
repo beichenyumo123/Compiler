@@ -4,8 +4,8 @@ project(Compiler)
 set(CMAKE_CXX_STANDARD 11)
 
 add_executable(Compiler main.cpp
-        LexicalAnalysis/impl/LexicalAnalysis.cpp
-        LexicalAnalysis/LexicalAnalysis.h
+        class/impl/LexicalAnalysis.cpp
+        class/LexicalAnalysis.h
         class/impl/Result.cpp
         class/Result.h
         class/impl/NFA.cpp
@@ -27,4 +27,8 @@ add_executable(Compiler main.cpp
         utils/impl/GrammarUtils.cpp
         utils/GrammarUtils.h
         constant/GrammarCommon.h
+        class/impl/PredictiveAnalysis.cpp
+        class/PredictiveAnalysis.h
+        class/impl/Item.cpp
+        class/Item.h
 )

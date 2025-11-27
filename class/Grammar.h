@@ -8,6 +8,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "../constant/GrammarCommon.h"
 
@@ -15,13 +16,16 @@
 //using  FollowSet = std::unordered_map<char, std::set<char>>;
 //using Production = std::unordered_map<char, std::list<std::string>>;
 //using SelectSet = std::unordered_map<char, std::list<std::pair<std::string, std::set<char>>>>;
-//using AnalysisTable = std::unordered_map<char, std::list<std::pair<char,std::string >>>
+//using AnalysisTable = std::unordered_map<char, std::list<std::pair<char,int >>>
 class Grammar {
 public:
     char startSymbol;
     std::set<char> terminalSymbols;
     std::set<char> nonTerminalSymbols;
     Production productions;
+
+    std::unordered_map<std::string,int> productions_order;
+    std::unordered_map<int,std::string> right_map;
 
     FirstSet first_set;
     FollowSet follow_set;
@@ -45,6 +49,7 @@ public:
     void printFollowSet();
     void printSelectSet();
     void printAnalysisTable();
+    void printProductionsOrder();
 
     void generateFirstSet();
     void generateFollowSet();

@@ -9,7 +9,7 @@
 #include <fstream>
 #include <vector>
 
-#include "../class/Result.h"
+#include "Result.h"
 
 class LexicalAnalysis {
 

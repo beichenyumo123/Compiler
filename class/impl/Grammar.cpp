@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 #include <sstream>
 #include "../../constant/GrammarCommon.h"
 using namespace std;
@@ -99,15 +100,17 @@ void Grammar::generateSelectSet() {
     }
 }
 
-//using AnalysisTable = std::unordered_map<char, std::list<std::pair<char,std::string >>>
+//using AnalysisTable = std::unordered_map<char, std::list<std::pair<char,int >>>
 void Grammar::generateAnalysisTable() {
     for (auto production : productions) {
         auto left = production.first;
         auto rights = production.second;
         for (auto right : rights) {
+            string p = string(1,left) + " -> " + right;
+
             if (right[0] == EPSILON_INTERNAL) {
                 for (auto b : follow_set[left]) {
-                    analysis_table[left].emplace_back(make_pair(b,right));
+                    analysis_table[left][b] = productions_order[p];
                 }
                 continue;
             }
@@ -115,11 +118,11 @@ void Grammar::generateAnalysisTable() {
             for (auto a : first_alpha) {
                 if (a == EPSILON_INTERNAL){
                     for (auto b : follow_set[left]) {
-                        analysis_table[left].emplace_back(make_pair(b,right));
+                        analysis_table[left][b] = productions_order[p];
                     }
                     continue;
                 }
-                analysis_table[left].emplace_back(make_pair(a,right));
+                analysis_table[left][a] = productions_order[p];
             }
         }
 
@@ -370,6 +373,10 @@ bool Grammar::readGrammarFromFile(ifstream infile) {
             std::string rhs = normalizeString(rawRhs); // 这里会把 "ε" 变成 "@"
 
             productions[lhs].push_back(rhs);
+
+            string production = string(1, lhs) + " -> " + rhs;
+            productions_order[production]=i;
+            right_map[i] = rhs;
         }
 
         // 4. 开始符号
@@ -410,7 +417,7 @@ void Grammar::printFirstSet() {
         generateFirstSet();
     }
     cout<<"----------FirstSet----------\n";
-    for (auto i : first_set) {
+    for (const auto& i : first_set) {
         cout<<i.first<<": ";
         for (auto j : i.second) {
             if (j=='@') {
@@ -430,7 +437,7 @@ void Grammar::printFollowSet() {
         generateFollowSet();
     }
     cout<<"----------FollowSet----------\n";
-    for (auto i : follow_set) {
+    for (const auto& i : follow_set) {
         cout<<i.first<<": ";
         for (auto j : i.second) {
             if (j=='@') {
@@ -470,19 +477,74 @@ void Grammar::printSelectSet() {
         }
     }
 }
-//using AnalysisTable = std::unordered_map<char, std::list<std::pair<char,std::string >>>
+//using AnalysisTable = std::unordered_map<char, std::unordered_map<char,int>>
 void Grammar::printAnalysisTable() {
-    for (auto i : analysis_table) {
-        for (auto j : i.second) {
-            cout<<"("<<i.first<<","<<j.first<<"): "<<i.first<<"->";
-            if (j.second[0] == EPSILON_INTERNAL) {
-                cout<<"ε\n";
-            }
-            else {
-                cout<<j.second<<endl;
-            }
-
-        }
+    int columnWidth = 8;
+    // 边界检查：空列/空表
+    if (terminalSymbols.empty()) {
+        std::cerr << "Error: 终结符集合（列）为空！" << std::endl;
+        return;
     }
+    if (analysis_table.empty()) {
+        std::cout << "分析表为空！" << std::endl;
+        return;
+    }
+
+    // 计算总分隔线长度
+    int totalLineLen = columnWidth + terminalSymbols.size() * columnWidth;
+    // 打印顶部分隔线
+    std::cout << std::string(totalLineLen, '-') << std::endl;
+
+    // ========== 步骤1：打印表头 ==========
+    // 第一列是行标识（非终结符列），先空出
+    std::cout << std::left << std::setw(columnWidth) << " ";
+    // 遍历所有列（终结符）作为表头
+    for (char colSymbol : terminalSymbols) {
+        std::cout << std::left << std::setw(columnWidth) << colSymbol;
+    }
+    std::cout << std::endl;
+
+    // ========== 步骤2：打印分隔线 ==========
+    std::cout << std::string(totalLineLen, '-') << std::endl;
+
+    // ========== 步骤3：提取并排序行键（解决unordered_map无序问题） ==========
+    std::vector<char> rowKeys;
+    for (const auto& row : analysis_table) {
+        rowKeys.push_back(row.first);
+    }
+    std::sort(rowKeys.begin(), rowKeys.end()); // 按字符序排序行
+
+    // ========== 步骤4：逐行打印内容 ==========
+    for (char rowKey : rowKeys) {
+        // 打印行标识（非终结符，左对齐）
+        std::cout << std::left << std::setw(columnWidth) << rowKey;
+
+        // 直接获取当前行的内层unordered_map（无需转换）
+        const auto& cellMap = analysis_table.at(rowKey);
+
+        // 遍历每一列，匹配对应值（无值则填空格）
+        for (char colSymbol : terminalSymbols) {
+            auto it = cellMap.find(colSymbol);
+            if (it != cellMap.end()) {
+                // 找到值：拼接 "p" + 数字并打印
+                std::string valueStr = "p" + std::to_string(it->second);
+                std::cout << std::left << std::setw(columnWidth) << valueStr;
+            } else {
+                // 未找到：打印空格占位
+                std::cout << std::left << std::setw(columnWidth) << " ";
+            }
+        }
+
+        // 每行结束换行
+        std::cout << std::endl;
+    }
+
+    // 打印底部分隔线
+    std::cout << std::string(totalLineLen, '-') << std::endl;
 }
 
+void Grammar::printProductionsOrder() {
+    for (auto s : productions_order) {
+        cout<<s.second<<": "<<s.first<<endl;
+    }
+}
