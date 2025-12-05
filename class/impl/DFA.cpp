@@ -175,18 +175,18 @@ vector<set<int>> DFA::initSet() {
 void DFA::printDFA() const{
     cout << "状态集合: ";
     for (int s : states) cout << s << " ";
-    cout << "\n符号集合: ";
+    cout << "\n字符集: ";
     for (char c : chars) cout << c << " ";
-    cout << "\n转换规则: " << endl;
+    cout << "\n产生式: " << endl;
     for (const auto& entry : transitions) {
         if (entry.second==DEAD_STATE) continue;
-        cout << "(" << entry.first.first << ", '" << entry.first.second << "') → ";
+        cout << "(" << entry.first.first << ", '" << entry.first.second << "') -> ";
         cout << entry.second << " ";
         cout << endl;
     }
-    cout << "初始状态: ";
+    cout << "起始状态: ";
     cout << original_state << " ";
-    cout<< "\n终止状态: ";
+    cout<< "\n终结状态: ";
     for (int f : final_states) cout << f << " ";
     cout << endl <<endl;
 }
@@ -204,6 +204,18 @@ DFA::DFA(std::set<int> states, std::set<char> chars, ReflectOfDFA transitions, i
     this->chars = std::move(chars);
     this->transitions = std::move(transitions);
     this->original_state = original_state;
+}
+
+DFA::DFA() {
+    this->states.clear();
+    this->chars.clear();
+    this->transitions.clear();
+    this->original_state = -1;
+    this->final_states.clear();
+}
+
+bool DFA::empty() const {
+    return states.empty() & chars.empty() &transitions.empty() & (original_state == -1) & final_states.empty();
 }
 
 

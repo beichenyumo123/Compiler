@@ -2,21 +2,24 @@
 <project version="4">
   <component name="Encoding" native2AsciiForPropertiesFiles="true" defaultCharsetForPropertiesFiles="UTF-8">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/class/DFA.h" charset="GBK" />
     <file url="file://$PROJECT_DIR$/class/Grammar.h" charset="GBK" />
     <file url="file://$PROJECT_DIR$/class/NFA.h" charset="GBK" />
     <file url="file://$PROJECT_DIR$/class/PredictiveAnalysis.h" charset="GBK" />
     <file url="file://$PROJECT_DIR$/class/impl/DFA.cpp" charset="GBK" />
     <file url="file://$PROJECT_DIR$/class/impl/Grammar.cpp" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/class/impl/LexicalAnalysis.cpp" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/class/impl/LRAnalysis.cpp" charset="GBK" />
     <file url="file://$PROJECT_DIR$/class/impl/LexicalAnalysis.cpp" charset="GBK" />
     <file url="file://$PROJECT_DIR$/class/impl/NFA.cpp" charset="GBK" />
     <file url="file://$PROJECT_DIR$/class/impl/PredictiveAnalysis.cpp" charset="GBK" />
     <file url="file://$PROJECT_DIR$/constant/GrammarCommon.h" charset="GBK" />
     <file url="file://$PROJECT_DIR$/data/Grammar.txt" charset="GBK" />
     <file url="file://$PROJECT_DIR$/data/GrammarTest.txt" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/data/LR.txt" charset="GBK" />
     <file url="file://$PROJECT_DIR$/data/LexicalAnalysis.txt" charset="GBK" />
     <file url="file://$PROJECT_DIR$/data/NFA2.txt" charset="GBK" />
     <file url="file://$PROJECT_DIR$/data/SymbolString.txt" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/experiment/Experiment.h" charset="GBK" />
     <file url="file://$PROJECT_DIR$/experiment/impl/Experiment.cpp" charset="GBK" />
     <file url="file://$PROJECT_DIR$/main.cpp" charset="GBK" />
     <file url="file://$PROJECT_DIR$/test/Test.cpp" charset="GBK" />

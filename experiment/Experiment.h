@@ -11,8 +11,10 @@ public:
     static void experiment1();
     static void experiment2();
     static void experiment3();
-    static void experiment4();
     static void experiment5();
+    static void experiment6();
+    static void experiment7();
+    static void experiment9();
 };
 
 

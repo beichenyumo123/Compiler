@@ -9,17 +9,18 @@
 #include "../../class/RE.h"
 #include "../../class/LexicalAnalysis.h"
 #include "../../class/Grammar.h"
+#include "../../class/LRAnalysis.h"
 #include "../../class/PredictiveAnalysis.h"
 
 
 //D:\Clion\Compiler\data\LexicalAnalysis.txt
 void Experiment::experiment1() {
     std::string filePath;
-    std::cout<<"----------Experiment1----------\n请输入文件路径：";
+    std::cout<<"----------Experiment1----------\n?????????·????";
     std::cin>>filePath;
     LexicalAnalysis lexical_analysis;
     while (!lexical_analysis.input(filePath)) {
-        std::cout << "文件打开失败，请再次输入文件路径：\n";
+        std::cout << "?????????????????????·????\n";
         std::cin>>filePath;
     }
 
@@ -33,8 +34,8 @@ void Experiment::experiment1() {
 //D:\Clion\Compiler\data\Contact.txt
 void Experiment::experiment2() {
     std::cout<<"\n----------Experiment2----------"<<std::endl;
-    std::cout<<"请输入文件路径：";
-    //文件内容的第一行需要是包含的NFA的个数
+    std::cout<<"?????????·????";
+    //??????????????????????NFA?????
     std::string filePath;
     std::cin>>filePath;
     //auto pair=Utils::readNFAFile(std::ifstream(filePath));
@@ -44,12 +45,12 @@ void Experiment::experiment2() {
     NFA nfa(filePath);
     nfa.printNFA();
     DFA dfa=nfa.determineNFA();//minimizeDFA();
-    std::cout<<"----------NFA确定化----------\n"<<std::endl;
+    std::cout<<"----------NFA?????----------\n"<<std::endl;
     dfa.printDFA();
 
     //dfa.printDFA();
     DFA d=dfa.minimizeDFA();
-    std::cout<<"----------DFA?最小化----------\n"<<std::endl;
+    std::cout<<"----------DFA???С??----------\n"<<std::endl;
     d.printDFA();
     std::cout<<"\n----------Experiment2 END----------\n";
     //system("pause");
@@ -62,7 +63,7 @@ void Experiment::experiment2() {
 //a(b|c)*abc
 void Experiment::experiment3() {
     std::cout<<"\n----------Experiment3----------"<<std::endl;
-    std::cout<<"请入正则表达式：";
+    std::cout<<"??????????????";
     std::string s;
     std::cin>>s;
     RE re(s);
@@ -78,26 +79,58 @@ void Experiment::experiment3() {
     //system("pause");
 }
 
-void Experiment::experiment4() {
-    std::cout<<"\n----------Experiment4----------"<<std::endl;
-    Grammar grammar(R"(D:\Clion\Compiler\data\GrammarTest.txt)");
-    // grammar.printFirstSet();
-    // grammar.printFollowSet();
-    // grammar.printSelectSet();
-    grammar.printProductionsOrder();
-    std::cout<<"\n----------Experiment4 END----------\n";
-}
-
 void Experiment::experiment5() {
     std::cout<<"\n----------Experiment5----------"<<std::endl;
+    Grammar grammar(R"(D:\Clion\Compiler\data\GrammarTest.txt)");
+    grammar.printFirstSet();
+    grammar.printFollowSet();
+    grammar.printSelectSet();
+    //grammar.printProductionsOrder();
+    std::cout<<"\n----------Experiment5 END----------\n";
+}
+
+void Experiment::experiment6() {
+    std::cout<<"\n----------Experiment6----------"<<std::endl;
     Grammar grammar(R"(D:\Clion\Compiler\data\Grammar.txt)");
     grammar.printAnalysisTable();
     PredictiveAnalysis predictive_analysis(grammar);
 
     predictive_analysis.analysis(R"(D:\Clion\Compiler\data\SymbolString.txt)");
 
-    std::cout<<"\n----------Experiment5 END----------\n";
+    std::cout<<"\n----------Experiment6 END----------\n";
 }
+
+void Experiment::experiment7() {
+    std::cout<<"\n----------Experiment7----------"<<std::endl;
+    Grammar grammar(R"(D:\Clion\Compiler\data\LR.txt)");
+
+    // grammar.printProductionsOrder();
+    //grammar.printItemSet();
+
+    DFA dfa = grammar.generateDFA();
+    std::cout<<"\n----------识别活前缀的DFA----------\n";
+    dfa.printDFA();
+    grammar.printActionTable();
+    grammar.printGoToTable();
+
+    std::cout<<"\n----------Experiment7 END----------\n";
+}
+
+void Experiment::experiment9() {
+    std::cout<<"\n----------Experiment9----------"<<std::endl;
+    Grammar grammar(R"(D:\Clion\Compiler\data\LRAnalysis.txt)");
+    std::string filePath=R"(D:\Clion\Compiler\data\LR_Action_GoTo.txt)";
+    LRAnalysis lr_analysis(filePath,grammar);
+    // lr_analysis.printActionTable();
+    // lr_analysis.printGoToTable();
+    std::string s="*i=i#";
+    lr_analysis.analysis(s);
+    std::cout<<"\n----------Experiment9 END----------\n";
+}
+
+
+
+
 
 
 

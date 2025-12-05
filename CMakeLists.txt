@@ -31,4 +31,6 @@ add_executable(Compiler main.cpp
         class/PredictiveAnalysis.h
         class/impl/Item.cpp
         class/Item.h
+        class/impl/LRAnalysis.cpp
+        class/LRAnalysis.h
 )

@@ -11,10 +11,28 @@
 #include <sstream>
 #include "../../constant/GrammarCommon.h"
 using namespace std;
+//using Item = std::unordered_map<char, std::unordered_map<int,int>>
+void Grammar::generateItems() {
+    if (!items.empty()) return;
+    for (const auto& production : productions) {
+        auto left = production.first;
+        auto rights = production.second;
+        for (auto right : rights) {
+            string p = string(1, left) + " -> " + right;
+            if (right[0] == EPSILON_INTERNAL) {
+                items.insert(make_pair(productions_order[p], 1));
+            }else {
+                for (int i=0;i<=right.length();i++) {
+                    items.insert(make_pair(productions_order[p], i));
+                }
+            }
+        }
+    }
+}
 
 
 void Grammar::generateFirstSet() {
-    if (!first_set.empty()) return;
+     if (!first_set.empty()) return;
     for (char c:terminalSymbols) {
         first_set[c]={c};
     }
@@ -25,8 +43,9 @@ void Grammar::generateFirstSet() {
             char left=production.first;
             for (string right : production.second) {
                 //如果右部第一个是终结符
-                if (terminalSymbols.count(right[0])!=0 || right[0] == EPSILON_INTERNAL) {
+                if (isTerminal(right[0]) || right[0] == EPSILON_INTERNAL) {
                     if (first_set.count(left)!=0) {
+                        //是否存在
                         if (first_set[left].insert(right[0]).second) {
                             flag = true;
                         }
@@ -101,7 +120,7 @@ void Grammar::generateSelectSet() {
 }
 
 //using AnalysisTable = std::unordered_map<char, std::list<std::pair<char,int >>>
-void Grammar::generateAnalysisTable() {
+void Grammar::generateLLAnalysisTable() {
     for (auto production : productions) {
         auto left = production.first;
         auto rights = production.second;
@@ -188,13 +207,15 @@ bool addFollowAToFollowB(FollowSet& follow_set, const char& source, const char& 
 bool Grammar::checkTheNail(const char &left, const std::string &right) {
     int n=right.length()-1;
     bool flag=false;
-    if (nonTerminalSymbols.count(right[n])!=0) {
+    //nonTerminalSymbols.count(right[n])!=0
+    if (isNonTerminal(right[n])) {
         if (addFollowAToFollowB(follow_set,left,right[n])) {
             flag = true;
         }
     }
     for (int i=0;i<n;i++) {
-        if (terminalSymbols.count(right[i])!=0) {
+        //terminalSymbols.count(right[i])!=0
+        if (isTerminal(right[i])) {
             continue;
         }
 
@@ -226,7 +247,8 @@ bool Grammar::addFirstSetToFollowSet(const std::string &right) {
     int n=right.length();
     for (int j=1;j<n;j++) {
         int i=j-1;
-        if (nonTerminalSymbols.count(right[i])!=0) {
+        //nonTerminalSymbols.count(right[i])!=0
+        if (isNonTerminal(right[i])) {
             if (addNonEpsilonElementsToFollowSet(right[j],right[i],first_set,follow_set)) {
                 flag = true;
             }
@@ -278,7 +300,8 @@ Grammar::Grammar(const std::string& filePath) {
     generateFirstSet();
     generateFollowSet();
     generateSelectSet();
-    generateAnalysisTable();
+    generateLLAnalysisTable();
+    generateItems();
 }
 
 Grammar::Grammar() {
@@ -339,7 +362,7 @@ bool Grammar::readGrammarFromFile(ifstream infile) {
         int n; infile >> n;
         for (int i = 0; i < n; ++i) {
             std::string temp; infile >> temp;
-            nonTerminalSymbols.insert(normalizeChar(temp));
+            nonTerminalSymbols.push_back(normalizeChar(temp));
         }
 
         // 2. 终结符
@@ -351,7 +374,7 @@ bool Grammar::readGrammarFromFile(ifstream infile) {
                 // 通常 ε 不存入 terminalSymbols，因为它不是真实的 token
                 // 但如果你需要，可以 insert(EPSILON_INTERNAL);
             } else {
-                terminalSymbols.insert(temp[0]);
+                terminalSymbols.push_back(temp[0]);
             }
         }
 
@@ -376,7 +399,7 @@ bool Grammar::readGrammarFromFile(ifstream infile) {
 
             string production = string(1, lhs) + " -> " + rhs;
             productions_order[production]=i;
-            right_map[i] = rhs;
+            production_map[i] = make_pair(lhs,rhs);
         }
 
         // 4. 开始符号
@@ -548,3 +571,219 @@ void Grammar::printProductionsOrder() {
         cout<<s.second<<": "<<s.first<<endl;
     }
 }
+
+void Grammar::printItemSet() {
+    this->printItemSet(this->items);
+}
+
+void Grammar::printItemSet(const ItemSet& item_set) {
+    for (auto i : item_set) {
+        auto left = production_map[i.first].first;
+        auto right = production_map[i.first].second;
+        cout<<"\t"<<left<<"->";
+        if (right[0] == EPSILON_INTERNAL) {
+            cout<<".\n";
+        }else {
+            int j=0;
+            for (;j<right.length();j++) {
+                if (j == i.second) {
+                    cout<<".";
+                }
+                cout<<right[j];
+            }
+            if (j == i.second) {
+                cout<<".";
+            }
+            cout<<endl;
+        }
+    }
+}
+
+void Grammar::printFamily() {
+
+    for (int i=0;i<family.size();i++) {
+        cout<<"I"<<i<<": \n";
+        this->printItemSet(family[i]);
+    }
+}
+
+DFA Grammar::generateDFA() {
+    int order = productions_order[std::string(1,startSymbol) + " -> " + *(productions[startSymbol].begin())];
+    family.push_back(getEpsilonClosureOfItemSet({std::make_pair(order,0)}));
+
+    std::set<int> states={0};//状态集合
+    std::set<char> chars(terminalSymbols.begin(),terminalSymbols.end());//字母表
+    chars.insert(nonTerminalSymbols.begin(),nonTerminalSymbols.end());
+    ReflectOfDFA transitions;//映照
+    int original_state = 0; //唯一初态
+    std::set<int> final_states;
+
+    int i=0;
+    while (i < family.size()) {
+        // const auto& item_set = family[i];
+        bool is_final = true;
+        for (char X : chars) {
+            ItemSet set = go(family[i],X);
+            if (!set.empty()) {
+                int next=-1;
+                int index=findIndexInFamily(family,set);
+                if (index == -1) {
+                    family.push_back(set);
+                    next = family.size()-1;
+                }
+                else {
+                    next = index;
+                }
+                transitions[{i,X}]= next;
+                is_final = false;
+            }
+        }
+        if (is_final) {
+            final_states.insert(i);
+        }
+        i++;
+        if (i < family.size()) states.insert(i);
+    }
+
+    printFamily();
+
+    this->dfa = {states,chars,transitions,original_state,final_states};
+    return dfa;
+}
+//using Action = std::pair<char,int>;
+//using ActionTable = unordered_map<int, unordered_map<char,Action>>;
+
+void Grammar::generateActionTable() {
+    if (dfa.empty()) {
+        generateDFA();
+    }
+    for (int i=0;i<family.size();i++) {
+        for (auto item : family[i]) {
+            auto right = production_map[item.first].second;
+            //归约项目
+            if (item.second == right.length()) {
+                if (production_map[item.first].first == startSymbol) {
+                    action_table[i]['#'] = make_pair('a',-1);
+                }
+                else {
+                    for (auto c : terminalSymbols) {
+                        action_table[i][c] = make_pair('r',item.first);
+                    }
+                    action_table[i]['#'] = make_pair('r',item.first);
+                }
+            }else {
+                //terminalSymbols.count(right[item.second])
+                if (isTerminal(right[item.second])) {
+                    int j = dfa.transitions[{i,right[item.second]}];
+                    action_table[i][right[item.second]] = make_pair('s',j);
+                }
+            }
+        }
+    }
+}
+//using Action = std::pair<char,int>;
+//using ActionTable = unordered_map<int, unordered_map<char,Action>>;
+void Grammar::printActionTable() {
+    if (action_table.empty()) {
+        generateActionTable();
+    }
+    cout<<"\n----------ActionTable----------\n";
+    for (const auto& i : action_table) {
+        for (const auto j : i.second) {
+            cout<<"("<<i.first<<", "<<j.first<<")"<<": ";
+            if (j.second.first == 'a') {
+                cout<<"acc"<<endl;
+                continue;
+            }
+            cout<<j.second.first<<j.second.second<<endl;
+        }
+    }
+
+}
+
+//using GoToTable = unordered_map<int, unordered_map<char,int>>;
+void Grammar::generateGoToTable() {
+    if (dfa.empty()) {
+        generateDFA();
+    }
+    cout<<"\n----------GoTo Table----------\n";
+    for (auto transition : dfa.transitions) {
+        //nonTerminalSymbols.count(transition.first.second)
+        if (isNonTerminal(transition.first.second)) {
+            go_to_table[transition.first.first][transition.first.second] = transition.second;
+        }
+    }
+}
+void Grammar::printGoToTable() {
+    if (go_to_table.empty()) {
+        generateGoToTable();
+    }
+    for (auto i : go_to_table) {
+        for (auto j : i.second) {
+            cout<<"("<<i.first<<", "<<j.first<<")"<<": "<<j.second<<endl;
+        }
+    }
+}
+
+
+int Grammar::findIndexInFamily(const std::vector<ItemSet>& family,const ItemSet &item_set) {
+    auto it =  std::find(family.begin(), family.end(), item_set);
+    if (it != family.end()) {
+        return  std::distance(family.begin(), it);
+    }
+    return -1;
+}
+
+
+ItemSet Grammar::go(const ItemSet& I, const char& X) {
+    return getEpsilonClosureOfItemSet(getJset(I,X));
+}
+
+ItemSet Grammar::getJset(const ItemSet &I, const char &X) {
+    ItemSet res;
+    for (auto i : I) {
+        auto right = production_map[i.first].second;
+
+        if (i.second+1 <= right.size()) {
+            if (X == right[i.second]) {
+                res.insert(make_pair(i.first,i.second+1));
+            }
+        }
+    }
+
+
+    return res;
+}
+
+
+ItemSet Grammar::getEpsilonClosureOfItemSet(ItemSet item_set) {
+    ItemSet res = item_set;
+    bool flag = false;
+    while (!flag) {
+        flag = true;
+        for (auto i : item_set) {
+            string right = production_map[i.first].second;
+            int k = i.second;
+            if (k<right.length()) {
+                if (isNonTerminal(right[k])) {
+                    //拿到该非终结符的所有产生式
+                    for (const auto& production : productions[right[k]]) {
+                        string p = string(1,right[k]) + " -> " + production;
+                        int order = productions_order[p];
+                        if (res.insert(make_pair(order,0)).second) {
+                            flag = false;
+                        }
+                    }
+                }
+            }
+            else {
+                // TODO 标记规约
+            }
+        }
+    }
+
+    return res;
+}
+
+
+

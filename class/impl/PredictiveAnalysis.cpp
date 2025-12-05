@@ -20,7 +20,7 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
     }
 
     std::string input_string;
-    // 逐行读取并过滤空白
+
     if (!readLineWithoutWhitespace(file, input_string)) {
         cout<<"Read File Error!\n";
         return;
@@ -46,10 +46,11 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
         cout<<cnt++<<":";
         char x = analysis_stack.top();
         analysis_stack.pop();
-        cout<<"出栈X="<<x<<", 输入c="<<c<<", ";
-        if (grammar.terminalSymbols.count(x) != 0) {
+        cout<<"出栈X="<<x<<",  输入c="<<c<<", ";
+        //grammar.terminalSymbols.count(x) != 0
+        if (grammar.isTerminal(x)) {
             if (x == c) {
-                cout<<"匹配, 输入指针往后移\n";
+                cout<<"匹配, 输入指针后移\n";
                 index++;
                 if (index == input_string.length()) {
                     cout<<"ERROR!"<<endl;
@@ -60,7 +61,7 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
         }
         else if (x == '#') {
             if (x == c) {
-                cout<<"匹配成功"<<endl;
+                cout<<"匹配，成功。"<<endl;
                 flag = false;
             }
             else {
@@ -69,7 +70,7 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
             }
         }
         else if (grammar.analysis_table[x].count(c)) {
-            string right = grammar.right_map[grammar.analysis_table[x][c]];
+            string right = grammar.production_map[grammar.analysis_table[x][c]].second;
             cout<<"查表: M[X,c] = "<<x<<" -> ";
             if (right[0] != EPSILON_INTERNAL) {
                 for (int i=right.length()-1;i>=0;i--) {
@@ -78,7 +79,8 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
                 cout<<right<<", 产生式右部逆序入栈; \n";
             }
             else {
-                cout<<"ε\n";
+                // TODO
+                cout<<"\n";
             }
         }else {
             cout<<"ERROR!"<<endl;
@@ -91,23 +93,23 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
 }
 
 bool readLineWithoutWhitespace(std::ifstream& fin, std::string& out_line) {
-    // 1. 读取整行（包含所有空白）
+    // 1. ??????У????????п???
     std::string raw_line;
     if (!std::getline(fin, raw_line)) {
-        return false; // 读到文件尾/出错，返回失败
+        return false; // ???????β/?????????????
     }
 
-    // 2. 过滤所有空白字符（移除空格、\t、\r、\n 等）
-    // remove_if：把非空白字符移到字符串前面，返回新的尾迭代器
+    // 2. ???????п?????????????\t??\r??\n ???
+    // remove_if????????????????????棬???????β??????
     auto new_end = std::remove_if(raw_line.begin(), raw_line.end(),
         [](char c) {
-            // isspace：判断是否是空白字符（包含所有空白类型）
+            // isspace???ж????????????????????п???????
             return std::isspace(static_cast<unsigned char>(c));
         });
-    // erase：删除末尾的无效字符（空白被移到后面，需要擦除）
+    // erase??????β????Ч???????????????棬?????????
     raw_line.erase(new_end, raw_line.end());
 
-    // 3. 输出过滤后的结果
+    // 3. ???????????
     out_line = raw_line;
     return true;
 }

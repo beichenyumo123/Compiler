@@ -1,0 +1,16 @@
+4
+S' E A B
+
+4
+a b c d
+
+7
+S' -> E
+E -> aA
+E -> bB
+A -> cA
+A -> d
+B -> cB
+B -> d
+
+S'

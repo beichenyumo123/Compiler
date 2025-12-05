@@ -14,11 +14,12 @@
 
 class DFA{
 public:
-    std::set<int> states;//çŠ¶æ€é›†åˆ
-    std::set<char> chars;//å­—æ¯è¡¨
-    ReflectOfDFA transitions;//æ˜ ç…§
-    int original_state; //å”¯ä¸€åˆæ€
+    std::set<int> states;//×´Ì¬¼¯ºÏ
+    std::set<char> chars;//×ÖÄ¸±í
+    ReflectOfDFA transitions;//Ó³ÕÕ
+    int original_state; //Î¨Ò»³õÌ¬
     std::set<int> final_states;
+    DFA();
 
     DFA(std::set<int> states,std::set<char> chars,
         ReflectOfDFA transitions,
@@ -29,6 +30,8 @@ public:
 
     DFA minimizeDFA();
     void printDFA() const;
+
+    bool empty() const;
 private:
     void makeDFAComplete();
 
