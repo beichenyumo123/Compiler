@@ -83,8 +83,8 @@ public:
     void generateGoToTable();
 
 
-    ItemSet getEpsilonClosureOfItemSet(ItemSet item_set);
-    ItemSet go(const ItemSet& I,const char& X);
+    std::pair<ItemSet,bool> getEpsilonClosureOfItemSet(ItemSet item_set);
+    std::pair<ItemSet,bool> go(const ItemSet& I,const char& X);
     bool isTerminal(const char& c) const {
         for (char terminalSymbol : terminalSymbols) {
             if (c == terminalSymbol) return true;

@@ -9,6 +9,8 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <stack>
+
 #include "../../constant/GrammarCommon.h"
 using namespace std;
 //using Item = std::unordered_map<char, std::unordered_map<int,int>>
@@ -609,7 +611,8 @@ void Grammar::printFamily() {
 
 DFA Grammar::generateDFA() {
     int order = productions_order[std::string(1,startSymbol) + " -> " + *(productions[startSymbol].begin())];
-    family.push_back(getEpsilonClosureOfItemSet({std::make_pair(order,0)}));
+    std::pair<ItemSet, bool> pair = getEpsilonClosureOfItemSet({std::make_pair(order,0)});
+    family.push_back(pair.first);
 
     std::set<int> states={0};//状态集合
     std::set<char> chars(terminalSymbols.begin(),terminalSymbols.end());//字母表
@@ -617,13 +620,17 @@ DFA Grammar::generateDFA() {
     ReflectOfDFA transitions;//映照
     int original_state = 0; //唯一初态
     std::set<int> final_states;
+    if (pair.second) final_states.insert(0);
 
     int i=0;
     while (i < family.size()) {
         // const auto& item_set = family[i];
         bool is_final = true;
         for (char X : chars) {
-            ItemSet set = go(family[i],X);
+            auto  pair = go(family[i],X);
+            auto set = pair.first;
+            if(pair.second) final_states.insert(i);
+
             if (!set.empty()) {
                 int next=-1;
                 int index=findIndexInFamily(family,set);
@@ -735,7 +742,7 @@ int Grammar::findIndexInFamily(const std::vector<ItemSet>& family,const ItemSet 
 }
 
 
-ItemSet Grammar::go(const ItemSet& I, const char& X) {
+std::pair<ItemSet,bool> Grammar::go(const ItemSet& I, const char& X) {
     return getEpsilonClosureOfItemSet(getJset(I,X));
 }
 
@@ -756,8 +763,9 @@ ItemSet Grammar::getJset(const ItemSet &I, const char &X) {
 }
 
 
-ItemSet Grammar::getEpsilonClosureOfItemSet(ItemSet item_set) {
+std::pair<ItemSet,bool> Grammar::getEpsilonClosureOfItemSet(ItemSet item_set) {
     ItemSet res = item_set;
+    bool is_final = false;
     bool flag = false;
     while (!flag) {
         flag = true;
@@ -765,24 +773,36 @@ ItemSet Grammar::getEpsilonClosureOfItemSet(ItemSet item_set) {
             string right = production_map[i.first].second;
             int k = i.second;
             if (k<right.length()) {
+
                 if (isNonTerminal(right[k])) {
                     //拿到该非终结符的所有产生式
-                    for (const auto& production : productions[right[k]]) {
-                        string p = string(1,right[k]) + " -> " + production;
-                        int order = productions_order[p];
-                        if (res.insert(make_pair(order,0)).second) {
-                            flag = false;
+                    stack<char> s;
+                    s.push(right[k]);
+                    while (!s.empty()) {
+                        char current = s.top();
+                        s.pop();
+                        for (const auto& production : productions[current]) {
+                            string p = string(1,current) + " -> " + production;
+                            int order = productions_order[p];
+                            if (res.insert(make_pair(order,0)).second) {
+                                if (isNonTerminal(production_map[order].second[0])) {
+                                    s.push(production_map[order].second[0]);
+                                }
+                                flag = false;
+                            }
                         }
                     }
+
                 }
             }
             else {
                 // TODO 标记规约
+                is_final = true;
             }
         }
     }
 
-    return res;
+    return make_pair(res,is_final);
 }
 
 

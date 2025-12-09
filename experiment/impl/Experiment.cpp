@@ -102,7 +102,7 @@ void Experiment::experiment6() {
 
 void Experiment::experiment7() {
     std::cout<<"\n----------Experiment7----------"<<std::endl;
-    Grammar grammar(R"(D:\Clion\Compiler\data\LR.txt)");
+    Grammar grammar(R"(D:\Clion\Compiler\data\exp7.txt)");
 
     // grammar.printProductionsOrder();
     //grammar.printItemSet();
