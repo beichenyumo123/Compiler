@@ -39,15 +39,12 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
     analysis_stack.push('#');
     analysis_stack.push(grammar.startSymbol);
 
-
-    bool flag=true;
     int cnt=1;
-    while (flag) {
+    while (true) {
         cout<<cnt++<<":";
         char x = analysis_stack.top();
         analysis_stack.pop();
         cout<<"出栈X="<<x<<",  输入c="<<c<<", ";
-        //grammar.terminalSymbols.count(x) != 0
         if (grammar.isTerminal(x)) {
             if (x == c) {
                 cout<<"匹配, 输入指针后移\n";
@@ -62,12 +59,11 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
         else if (x == '#') {
             if (x == c) {
                 cout<<"匹配，成功。"<<endl;
-                flag = false;
             }
             else {
                 cout<<"ERROR!"<<endl;
-                return;
             }
+            break;
         }
         else if (grammar.analysis_table[x].count(c)) {
             string right = grammar.production_map[grammar.analysis_table[x][c]].second;
@@ -79,7 +75,6 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
                 cout<<right<<", 产生式右部逆序入栈; \n";
             }
             else {
-                // TODO
                 cout<<"\n";
             }
         }else {
@@ -93,23 +88,17 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
 }
 
 bool readLineWithoutWhitespace(std::ifstream& fin, std::string& out_line) {
-    // 1. ??????У????????п???
     std::string raw_line;
     if (!std::getline(fin, raw_line)) {
-        return false; // ???????β/?????????????
+        return false;
     }
 
-    // 2. ???????п?????????????\t??\r??\n ???
-    // remove_if????????????????????棬???????β??????
     auto new_end = std::remove_if(raw_line.begin(), raw_line.end(),
         [](char c) {
-            // isspace???ж????????????????????п???????
             return std::isspace(static_cast<unsigned char>(c));
         });
-    // erase??????β????Ч???????????????棬?????????
     raw_line.erase(new_end, raw_line.end());
 
-    // 3. ???????????
     out_line = raw_line;
     return true;
 }

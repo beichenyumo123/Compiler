@@ -129,13 +129,7 @@ void Grammar::generateLLAnalysisTable() {
         for (auto right : rights) {
             string p = string(1,left) + " -> " + right;
 
-            if (right[0] == EPSILON_INTERNAL) {
-                for (auto b : follow_set[left]) {
-                    analysis_table[left][b] = productions_order[p];
-                }
-                continue;
-            }
-            auto first_alpha = getFirstAlpha(left,right);
+            auto first_alpha = getFirstAlpha(right);
             for (auto a : first_alpha) {
                 if (a == EPSILON_INTERNAL){
                     for (auto b : follow_set[left]) {
@@ -151,23 +145,28 @@ void Grammar::generateLLAnalysisTable() {
 }
 
 
-set<char> Grammar::getFirstAlpha(const char& left,const std::string &right) {
+set<char> Grammar::getFirstAlpha(const std::string &right) {
+    if (right[0] == EPSILON_INTERNAL) {
+        return {EPSILON_INTERNAL};
+    }
     set<char> firstAlpha;
 
-    if ( first_set[right[0]].count(EPSILON_INTERNAL) == 0) {
-        firstAlpha=first_set[right[0]];
+    for (auto c : first_set[right[0]]) {
+        if (c != EPSILON_INTERNAL) firstAlpha.insert(c);
     }
-    else {
-        for (int j=1;j<right.length();j++) {
-            if (allContainsEpsilon(first_set,right,0,j-1)) {
-                for (auto c : first_set[right[j]]) {
-                    firstAlpha.insert(c);
-                }
-            }else {
-                break;
-            }
 
+    for (int j=1;j<right.length();j++) {
+        if (allContainsEpsilon(first_set,right,0,j-1)) {
+            for (auto c : first_set[right[j]]) {
+                if (c != EPSILON_INTERNAL) firstAlpha.insert(c);
+            }
+        }else {
+            break;
         }
+    }
+
+    if (allContainsEpsilon(first_set,right,0,right.size()-1)) {
+        firstAlpha.insert(EPSILON_INTERNAL);
     }
 
     return firstAlpha;
@@ -177,7 +176,7 @@ set<char> Grammar::firstSetOfRightContainsEpsilon(const char& left,const std::st
     if (right[0] == EPSILON_INTERNAL) {
         return  follow_set[left];
     }
-    set<char> firstAlpha = getFirstAlpha(left,right);
+    set<char> firstAlpha = getFirstAlpha(right);
 
     if (firstAlpha.count(EPSILON_INTERNAL) == 0) {
         return firstAlpha;
@@ -611,8 +610,7 @@ void Grammar::printFamily() {
 
 DFA Grammar::generateDFA() {
     int order = productions_order[std::string(1,startSymbol) + " -> " + *(productions[startSymbol].begin())];
-    std::pair<ItemSet, bool> pair = getEpsilonClosureOfItemSet({std::make_pair(order,0)});
-    family.push_back(pair.first);
+    family.push_back(getEpsilonClosureOfItemSet({std::make_pair(order,0)}));
 
     std::set<int> states={0};//状态集合
     std::set<char> chars(terminalSymbols.begin(),terminalSymbols.end());//字母表
@@ -620,16 +618,12 @@ DFA Grammar::generateDFA() {
     ReflectOfDFA transitions;//映照
     int original_state = 0; //唯一初态
     std::set<int> final_states;
-    if (pair.second) final_states.insert(0);
+
 
     int i=0;
     while (i < family.size()) {
-        // const auto& item_set = family[i];
-        bool is_final = true;
         for (char X : chars) {
-            auto  pair = go(family[i],X);
-            auto set = pair.first;
-            if(pair.second) final_states.insert(i);
+            auto  set = go(family[i],X);
 
             if (!set.empty()) {
                 int next=-1;
@@ -642,11 +636,7 @@ DFA Grammar::generateDFA() {
                     next = index;
                 }
                 transitions[{i,X}]= next;
-                is_final = false;
             }
-        }
-        if (is_final) {
-            final_states.insert(i);
         }
         i++;
         if (i < family.size()) states.insert(i);
@@ -664,7 +654,10 @@ void Grammar::generateActionTable() {
     if (dfa.empty()) {
         generateDFA();
     }
+    is_Lr0 = true;
     for (int i=0;i<family.size();i++) {
+        bool r = false;
+        bool s = false;
         for (auto item : family[i]) {
             auto right = production_map[item.first].second;
             //归约项目
@@ -673,13 +666,22 @@ void Grammar::generateActionTable() {
                     action_table[i]['#'] = make_pair('a',-1);
                 }
                 else {
+                    if (r || s) {
+                        is_Lr0=false;
+                        return;
+                    }
+                    r = true;
                     for (auto c : terminalSymbols) {
                         action_table[i][c] = make_pair('r',item.first);
                     }
                     action_table[i]['#'] = make_pair('r',item.first);
                 }
             }else {
-                //terminalSymbols.count(right[item.second])
+                if (r) {
+                    is_Lr0 = false;
+                    return;
+                }
+                s = true;
                 if (isTerminal(right[item.second])) {
                     int j = dfa.transitions[{i,right[item.second]}];
                     action_table[i][right[item.second]] = make_pair('s',j);
@@ -713,7 +715,6 @@ void Grammar::generateGoToTable() {
     if (dfa.empty()) {
         generateDFA();
     }
-    cout<<"\n----------GoTo Table----------\n";
     for (auto transition : dfa.transitions) {
         //nonTerminalSymbols.count(transition.first.second)
         if (isNonTerminal(transition.first.second)) {
@@ -725,6 +726,7 @@ void Grammar::printGoToTable() {
     if (go_to_table.empty()) {
         generateGoToTable();
     }
+    cout<<"\n----------GoTo Table----------\n";
     for (auto i : go_to_table) {
         for (auto j : i.second) {
             cout<<"("<<i.first<<", "<<j.first<<")"<<": "<<j.second<<endl;
@@ -742,7 +744,7 @@ int Grammar::findIndexInFamily(const std::vector<ItemSet>& family,const ItemSet 
 }
 
 
-std::pair<ItemSet,bool> Grammar::go(const ItemSet& I, const char& X) {
+ItemSet Grammar::go(const ItemSet& I, const char& X) {
     return getEpsilonClosureOfItemSet(getJset(I,X));
 }
 
@@ -758,14 +760,12 @@ ItemSet Grammar::getJset(const ItemSet &I, const char &X) {
         }
     }
 
-
     return res;
 }
 
 
-std::pair<ItemSet,bool> Grammar::getEpsilonClosureOfItemSet(ItemSet item_set) {
+ItemSet Grammar::getEpsilonClosureOfItemSet(ItemSet item_set) {
     ItemSet res = item_set;
-    bool is_final = false;
     bool flag = false;
     while (!flag) {
         flag = true;
@@ -773,7 +773,6 @@ std::pair<ItemSet,bool> Grammar::getEpsilonClosureOfItemSet(ItemSet item_set) {
             string right = production_map[i.first].second;
             int k = i.second;
             if (k<right.length()) {
-
                 if (isNonTerminal(right[k])) {
                     //拿到该非终结符的所有产生式
                     stack<char> s;
@@ -795,14 +794,10 @@ std::pair<ItemSet,bool> Grammar::getEpsilonClosureOfItemSet(ItemSet item_set) {
 
                 }
             }
-            else {
-                // TODO 标记规约
-                is_final = true;
-            }
         }
     }
 
-    return make_pair(res,is_final);
+    return res;
 }
 
 

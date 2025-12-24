@@ -7,13 +7,13 @@
 
 
 int main() {
-    // Experiment::experiment1();
-    // Experiment::experiment2();
-    // Experiment::experiment3();
-    // Experiment::experiment5();
-    // Experiment::experiment6();
-     Experiment::experiment7();
-    // Experiment::experiment9();
+    Experiment::experiment1();
+    Experiment::experiment2();
+    Experiment::experiment3();
+    Experiment::experiment5();
+    Experiment::experiment6();
+    Experiment::experiment7();
+    Experiment::experiment9();
 
 
     return 0;

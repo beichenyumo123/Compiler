@@ -77,14 +77,15 @@ public:
     void generateSelectSet();
     void generateLLAnalysisTable();
 
+    bool is_Lr0;
     void generateItems();
     DFA generateDFA();
     void generateActionTable();
     void generateGoToTable();
 
 
-    std::pair<ItemSet,bool> getEpsilonClosureOfItemSet(ItemSet item_set);
-    std::pair<ItemSet,bool> go(const ItemSet& I,const char& X);
+    ItemSet getEpsilonClosureOfItemSet(ItemSet item_set);
+    ItemSet go(const ItemSet& I,const char& X);
     bool isTerminal(const char& c) const {
         for (char terminalSymbol : terminalSymbols) {
             if (c == terminalSymbol) return true;
@@ -111,7 +112,7 @@ private:
 
     std::set<char> firstSetOfRightContainsEpsilon(const char& left, const std::string& right);
 
-    std::set<char> getFirstAlpha(const char& left,const std::string& right);
+    std::set<char> getFirstAlpha(const std::string &right);
 
     ItemSet getJset(const ItemSet& I, const char& X);
 

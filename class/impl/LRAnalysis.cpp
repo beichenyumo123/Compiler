@@ -14,13 +14,16 @@
 using namespace std;
 
 int getIndex(Grammar& grammar,char c) {
+    if (c == '#') {
+        return 0;
+    }
     if (grammar.isTerminal(c)) {
         for (int i=0;i<grammar.terminalSymbols.size();i++) {
-            if (c==grammar.terminalSymbols[i]) return i;
+            if (c==grammar.terminalSymbols[i]) return i+1;
         }
     }else if (grammar.isNonTerminal(c)) {
         for (int i=0;i<grammar.nonTerminalSymbols.size();i++) {
-            if (c==grammar.nonTerminalSymbols[i]) return i;
+            if (c==grammar.nonTerminalSymbols[i]) return i+1;
         }
     }else {
         return  -1;
@@ -31,7 +34,7 @@ int advance(int& index, const string& input,Grammar& grammar,char &c) {
 
     if (index+1<input.size()) {
         c=input[++index];
-        return getIndex(grammar,c)+1;
+        return getIndex(grammar,c);
     }
     return -1;
 }
@@ -56,14 +59,14 @@ bool isKeyExist(
 void LRAnalysis::analysis(const std::string &input) {
     int index=0;
     char c=input[0];
-    int a =getIndex(grammar,input[0])+1;
+    int a =getIndex(grammar,input[0]);
     statue_stack.push(0);
-    //char_stack.push('#');
+    char_stack.push('#');
     int s=statue_stack.top();
-    char c_top='0';
+    char c_top='#';
 
     while (action_table[s][a].first!='a') {
-        cout<<s<<" "<<c_top<<" "<<c;
+        cout<<"栈顶"<<s<<" "<<c_top<<" 输入："<<c<<"; ";
         if (isKeyExist(action_table,s,a)) {
             pair<char, int> pair = action_table[s][a];
             if (pair.first=='s') {
@@ -72,25 +75,27 @@ void LRAnalysis::analysis(const std::string &input) {
                  s=statue_stack.top();
                  c_top=char_stack.top();
 
-
-                cout<<"进栈 "<<s<<" "<<c_top<<endl;
+                cout<<"查表s"<<pair.second;
+                cout<<"; 进栈 "<<s<<" "<<c_top<<endl;
                 a = advance(index,input,grammar,c);
             }
             else {
                 std::pair<char, std::string> production = grammar.production_map[pair.second];
+                char left = production.first;
                 cout<<"出栈"<<production.second.size()<<"个符号和状态  ";
                 for (int i=0;i<production.second.size();i++) {
                     statue_stack.pop();
                     char_stack.pop();
                 }
                 s=statue_stack.top();
-                // TODO
-                int mapped = go_to_table[s][getIndex(grammar,production.first)];
+
+                int mapped = go_to_table[s][getIndex(grammar,left)-1];
                 statue_stack.push(mapped);
-                char_stack.push(production.first);
+                char_stack.push(left);
+
                 s=statue_stack.top();
                 c_top=char_stack.top();
-                cout<<"进栈 "<<s<<" "<<c_top<<production.first<<" -> "<<production.second <<endl;
+                cout<<"进栈 "<<s<<" "<<c_top<<"注："<<production.first<<" -> "<<production.second <<endl;
             }
         }else {
             cout<<"ERROR\n";

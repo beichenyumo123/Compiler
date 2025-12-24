@@ -19,6 +19,7 @@
     <file url="file://$PROJECT_DIR$/data/LexicalAnalysis.txt" charset="GBK" />
     <file url="file://$PROJECT_DIR$/data/NFA2.txt" charset="GBK" />
     <file url="file://$PROJECT_DIR$/data/SymbolString.txt" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/data/exp7.txt" charset="GBK" />
     <file url="file://$PROJECT_DIR$/experiment/Experiment.h" charset="GBK" />
     <file url="file://$PROJECT_DIR$/experiment/impl/Experiment.cpp" charset="GBK" />
     <file url="file://$PROJECT_DIR$/main.cpp" charset="GBK" />

@@ -34,8 +34,7 @@ void Experiment::experiment1() {
 //D:\Clion\Compiler\data\Contact.txt
 void Experiment::experiment2() {
     std::cout<<"\n----------Experiment2----------"<<std::endl;
-    std::cout<<"?????????·????";
-    //??????????????????????NFA?????
+    std::cout<<"请输入文件路径：";
     std::string filePath;
     std::cin>>filePath;
     //auto pair=Utils::readNFAFile(std::ifstream(filePath));
@@ -45,12 +44,12 @@ void Experiment::experiment2() {
     NFA nfa(filePath);
     nfa.printNFA();
     DFA dfa=nfa.determineNFA();//minimizeDFA();
-    std::cout<<"----------NFA?????----------\n"<<std::endl;
+    std::cout<<"----------NFA确定化----------\n"<<std::endl;
     dfa.printDFA();
 
     //dfa.printDFA();
     DFA d=dfa.minimizeDFA();
-    std::cout<<"----------DFA???С??----------\n"<<std::endl;
+    std::cout<<"----------DFA最小化----------\n"<<std::endl;
     d.printDFA();
     std::cout<<"\n----------Experiment2 END----------\n";
     //system("pause");
@@ -63,7 +62,7 @@ void Experiment::experiment2() {
 //a(b|c)*abc
 void Experiment::experiment3() {
     std::cout<<"\n----------Experiment3----------"<<std::endl;
-    std::cout<<"??????????????";
+    std::cout<<"请输入正规式";
     std::string s;
     std::cin>>s;
     RE re(s);
@@ -92,6 +91,8 @@ void Experiment::experiment5() {
 void Experiment::experiment6() {
     std::cout<<"\n----------Experiment6----------"<<std::endl;
     Grammar grammar(R"(D:\Clion\Compiler\data\Grammar.txt)");
+    grammar.printFirstSet();
+    grammar.printFollowSet();
     grammar.printAnalysisTable();
     PredictiveAnalysis predictive_analysis(grammar);
 
@@ -104,7 +105,7 @@ void Experiment::experiment7() {
     std::cout<<"\n----------Experiment7----------"<<std::endl;
     Grammar grammar(R"(D:\Clion\Compiler\data\exp7.txt)");
 
-    // grammar.printProductionsOrder();
+    grammar.printProductionsOrder();
     //grammar.printItemSet();
 
     DFA dfa = grammar.generateDFA();
