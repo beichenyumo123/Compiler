@@ -26,7 +26,7 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
         return;
     }
     input_string += '#';
-    cout<<endl<<input_string<<"分析过程：\n";
+    cout<<endl<<input_string<<"分析过程\n";
 
     char c = input_string[0];
     int index=0;
@@ -47,7 +47,7 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
         cout<<"出栈X="<<x<<",  输入c="<<c<<", ";
         if (grammar.isTerminal(x)) {
             if (x == c) {
-                cout<<"匹配, 输入指针后移\n";
+                cout<<"匹配，输入指针后移；\n";
                 index++;
                 if (index == input_string.length()) {
                     cout<<"ERROR!"<<endl;
@@ -72,10 +72,10 @@ void PredictiveAnalysis::analysis(const std::string &file_path) {
                 for (int i=right.length()-1;i>=0;i--) {
                     analysis_stack.push(right[i]);
                 }
-                cout<<right<<", 产生式右部逆序入栈; \n";
+                cout<<right<<", 产生式右部逆序入栈； \n";
             }
             else {
-                cout<<"\n";
+                cout<<"ε\n";
             }
         }else {
             cout<<"ERROR!"<<endl;

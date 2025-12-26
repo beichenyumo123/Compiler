@@ -173,21 +173,23 @@ vector<set<int>> DFA::initSet() {
 }
 
 void DFA::printDFA() const{
-    cout << "×´Ì¬¼¯ºÏ: ";
+    cout <<"×´Ì¬¼¯:";
     for (int s : states) cout << s << " ";
-    cout << "\n×Ö·û¼¯: ";
+    cout << "\n×ÖÄ¸±í: ";
     for (char c : chars) cout << c << " ";
-    cout << "\n²úÉúÊ½: " << endl;
+    cout << "\nÓ³Éä: " << endl;
     for (const auto& entry : transitions) {
         if (entry.second==DEAD_STATE) continue;
         cout << "(" << entry.first.first << ", '" << entry.first.second << "') -> ";
         cout << entry.second << " ";
         cout << endl;
     }
-    cout << "ÆðÊ¼×´Ì¬: ";
+    cout << "ÆðÊ¼×´Ì¬:  ";
     cout << original_state << " ";
-    cout<< "\nÖÕ½á×´Ì¬: ";
-    for (int f : final_states) cout << f << " ";
+    if (!final_states.empty()) {
+        cout<< "\nÖÕÖ¹×´Ì¬: ";
+        for (int f : final_states) cout << f << " ";
+    }
     cout << endl <<endl;
 }
 

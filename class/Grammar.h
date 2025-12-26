@@ -72,6 +72,9 @@ public:
     void printActionTable();
     void printGoToTable();
 
+    void writeActionAndGoToTable(const std::string& filePath);
+
+
     void generateFirstSet();
     void generateFollowSet();
     void generateSelectSet();
@@ -118,7 +121,7 @@ private:
 
     int findIndexInFamily(const std::vector<ItemSet>& family, const ItemSet& item_set);
 
-
+    void writeLRTblFile(const std::string& filePath) const;
 
 };
 

@@ -166,27 +166,24 @@ RE::RE() {
 //预处理
 std::string RE::preProcess(const std::string& re) {
     std::string res;
-    int length=re.length();
-    for (int i=0;i<length;i++) {
-        if (i+1<length) {
-            if (isalpha(re[i+1])) {
-                if (isalpha(re[i]) || re[i]==')' || re[i]=='*') {
-                    res+=re[i];
-                    res+="&";
-                }else {
-                    res+=re[i];
+    int length = re.length();
+    for (int i = 0; i < length; i++) {
+        // 先将当前字符加入结果（优化写法：避免在每个分支重复 res+=re[i]）
+        res += re[i];
+
+        if (i + 1 < length) {
+            char next = re[i+1];
+            char current = re[i];
+
+            // 判断是否需要插入 '&'
+            // 情况1: 下一个是字母
+            // 情况2: 下一个是左括号 '('
+            if (isalpha(next) || next == '(') {
+                // 仅当当前字符是 字母、')' 或 '*' 时，才插入 '&'
+                if (isalpha(current) || current == ')' || current == '*') {
+                    res += "&";
                 }
             }
-            else if (re[i+1]=='('){
-                res+=re[i];
-                res+="&";
-            }
-            else {
-                res+=re[i];
-            }
-
-        }else {
-            res+=re[i];
         }
     }
     return res;

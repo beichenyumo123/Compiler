@@ -19,13 +19,13 @@ using namespace std;
 
 
 DFA NFA::determineNFA() {
-    //引入X初始状态，Y初始状态
+    //引入新的初态结点X和终态结点Y
     transitions[{NEW_START,EPSILON}] = {*original_state.begin()};
     transitions[{*final_states.begin(),EPSILON}] = {NEW_END};
 
-    //s代表状态转移矩阵的第一列
+    //s作为状态转移矩阵的行
     vector<set<int>> s;
-    //初始化第一行第一列
+    //初始化首行首列元素
     s.push_back(Utils::getEpsilonClosureOfSet({NEW_START}, transitions));
     vector<bool> isFinal;
     bool q=false;
@@ -38,23 +38,24 @@ DFA NFA::determineNFA() {
 
     unordered_map<pair<int,char>, int, PairHash> new_transition;
     int i = 0;
-    //构造状态转移矩阵，i表示某行，s的行数会逐渐递增到最后不变，循环会停止
+    //生成状态转移矩阵
     while (i < (int)s.size()) {
+        //对于每一列，产生第i行某列的元素
         for (char c : chars) {
+            //拿到Ic
             set<int> t = Utils::getEpsilonClosureOfSetAfterGetNextByCharOfSet(s[i], c, transitions);
-            //忽略空集
+
             if (t.empty()) continue;
-            //新的集合是否在状态转移矩阵的第一列
+            //是否在第一列中出现过
             auto it = find(s.begin(), s.end(), t);
-            //target相当于在构造状态转移矩阵时逐渐递增的新编号
+            //target记录其在第一列的行数
             int target;
-            //新的集合未在第一列出现
+            //不存在
             if (it == s.end()) {
-                //新的集合编号为当前状态转移矩阵的行数（从0开始编号，不需要+1）
+                //插入到现在的最后一行，并记录编号
                 target = s.size();
-                //新集合加入到状态转移矩阵的首列
                 s.push_back(t);
-                //判断这个集合中是否包含原来的终止状态并标记
+                //查找是否含有原终止状态，并标记
                 bool f=false;
                 for (int j:final_states) {
                     if (t.count(j)!=0) {
@@ -63,21 +64,21 @@ DFA NFA::determineNFA() {
                 }
                 isFinal.push_back(f);
             }
-            //在第一列出现
+            //已存在记录其行号
             else {
                 target = it - s.begin();
             }
-            //建立响应的映射关系，某行首列状态借助字符c转换到target状态
+            //重新编号建立映射关系
             new_transition[{i, c}] = target;
         }
-        //开始下一行
+        //生成状态转移矩阵的下一行
         i++;
     }
 
-    // 组装 DFA
+    // 构建DFA
     set<int> new_states;
     set<int> finals;
-    //初始化新的终止状态集合
+    //标记新的终止状态
     for (int j = 0; j < (int)s.size(); j++) {
         new_states.insert(j);
         if (isFinal[j]) finals.insert(j);
@@ -128,19 +129,19 @@ NFA NFA::operator+(const NFA &a) const{
 }
 
 void NFA::printNFA() const {
-    cout << "状态集合: ";
+    cout << "状态集: ";
     for (int s : states) cout << s << " ";
-    cout << "\n符号集合: ";
+    cout << "\n字母表: ";
     for (char c : chars) cout << c << " ";
-    cout << "\n转换规则: " << endl;
+    cout << "\n映射: " << endl;
     for (const auto& entry : transitions) {
-        cout << "(" << entry.first.first << ", '" << entry.first.second << "') → ";
+        cout << "(" << entry.first.first << ", '" << entry.first.second << "') -> ";
         for (int to : entry.second) cout << to << " ";
         cout << endl;
     }
-    cout << "初始状态: ";
+    cout << "初态: ";
     for (int f : original_state) cout << f << " ";
-    cout<< "\n终止状态: ";
+    cout<< "\n终态: ";
     for (int f : final_states) cout << f << " ";
     cout << endl<<endl;
 }
@@ -172,7 +173,7 @@ NFA::NFA(std::set<int> states, std::set<char> chars, ReflectOfNFA transitions, s
 NFA NFA::buildFromFile(const std::string &filePath) {
     ifstream file(filePath);
     if (!file) {
-        cout<<"初始化错误\n";
+        cout<<"?????????\n";
         return {};
     }else {
         int n;
@@ -183,7 +184,7 @@ NFA NFA::buildFromFile(const std::string &filePath) {
         }
         file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         if (n>1) {
-            //文件指针移动到最开始，确保读取的一致性
+            //?????????????????????????????
             file.seekg(0, std::ios::beg);
             auto pair=Utils::readNFAFile(std::move(file));
             // for (int i=0;i<pair.second;i++) {
@@ -192,39 +193,34 @@ NFA NFA::buildFromFile(const std::string &filePath) {
             return Utils::mergeNFA(pair.first,pair.second);
         }
         else {
-            NFA temp; // 临时对象
-            temp.readNfaUnite(std::move(file)); // 调用读取单个NFA的逻辑
-            return temp; // 返回临时对象
+            NFA temp; // ???????
+            temp.readNfaUnite(std::move(file)); // ??????????NFA?????
+            return temp; // ???????????
         }
     }
 }
 
-// 辅助函数：从文件流中读取下一个非空行（跳过空白行）
-// 返回值：是否成功读取到非空行；line参数存储读取到的非空行
 bool readNonEmptyLine(std::ifstream& file, std::string& line) {
     while (std::getline(file, line)) {
-        // 去除行首尾的空白字符（空格、制表符等）
         size_t start = line.find_first_not_of(" \t");
         size_t end = line.find_last_not_of(" \t");
-        if (start != std::string::npos) { // 存在非空白字符
-            line = line.substr(start, end - start + 1); // 截取有效部分
+        if (start != std::string::npos) {
+            line = line.substr(start, end - start + 1);
             return true;
         }
-        // 空行：继续读取下一行
     }
-    // 文件结束或读取失败
     return false;
 }
 
 ifstream NFA::readNfaUnite(std::ifstream file) {
     if (!file) {
-        cout<<"文件打开错误";
+        cout<<"????????";
         return {};
     }
     string line;
-    // 1. 读取状态集合（跳过空行）
+    // 1. ?????????????????У?
     if (!readNonEmptyLine(file, line)) {
-        cerr << "错误：读取状态集合失败" << endl;
+        cerr << "???????????????" << endl;
         return {};
     }
     istringstream iss1(line);
@@ -233,9 +229,9 @@ ifstream NFA::readNfaUnite(std::ifstream file) {
         states.insert(num);
     }
 
-    // 2. 读取字符集合（跳过空行）
-    if (!readNonEmptyLine(file, line)) { // 替换原getline(file, line)
-        cerr << "错误：读取字符集合失败" << endl;
+    // 2. ??????????????????У?
+    if (!readNonEmptyLine(file, line)) { // ?滻?getline(file, line)
+        cerr << "????????????????" << endl;
         return {};
     }
     istringstream iss2(line);
@@ -255,51 +251,51 @@ ifstream NFA::readNfaUnite(std::ifstream file) {
         }
     }
 
-    // 3. 读取转换规则数量n（跳过空行）
-    if (!readNonEmptyLine(file, line)) { // 替换原getline(file, line)
-        cerr << "错误：读取转换规则数量失败" << endl;
+    // 3. ??????????????n?????????У?
+    if (!readNonEmptyLine(file, line)) { // ?滻?getline(file, line)
+        cerr << "????????????????????" << endl;
         return {};
     }
     int n = stoi(line);
 
-    // 4. 读取n条转换规则（每条都跳过空行）
+    // 4. ???n?????????????????????У?
     for (int i = 0; i < n; ++i) {
-        if (!readNonEmptyLine(file, line)) { // 替换原getline(file, line)
-            cerr << "错误：读取第" << i << "条转换规则失败" << endl;
+        if (!readNonEmptyLine(file, line)) { // ?滻?getline(file, line)
+            cerr << "????????" << i << "????????????" << endl;
             return {};
         }
         istringstream iss3(line);
 
-        // 解析from_state
+        // ????from_state
         int from_state;
         if (!(iss3 >> from_state)) {
-            cerr << "错误：无法读取from_state" << endl;
+            cerr << "??????????from_state" << endl;
             return {};
         }
 
-        // 解析symbol
+        // ????symbol
         char symbol;
         iss3 >> ws;
         int next = iss3.peek();
         if (next == EOF) {
-            cerr << "错误：缺少第二个元素" << endl;
+            cerr << "??????????????" << endl;
             return {};
         }
         if (next == '-' || isdigit(next)) {
             int char_flag;
             if (!(iss3 >> char_flag)) {
-                cerr << "错误：读取整数失败" << endl;
+                cerr << "?????????????" << endl;
                 return {};
             }
             symbol = (char_flag == -1) ? '#' : ('0' + char_flag);
         } else {
             if (!(iss3 >> symbol)) {
-                cerr << "错误：读取字符失败" << endl;
+                cerr << "????????????" << endl;
                 return {};
             }
         }
 
-        // 解析to_states
+        // ????to_states
         list<int> to_states;
         int to_state;
         while (iss3 >> to_state) {
@@ -309,9 +305,9 @@ ifstream NFA::readNfaUnite(std::ifstream file) {
         transitions[{from_state, symbol}] = to_states;
     }
 
-    // 5. 读取初始状态（跳过空行）
-    if (!readNonEmptyLine(file, line)) { // 替换原getline(file, line)
-        cerr << "错误：读取初始状态失败" << endl;
+    // 5. ?????????????????У?
+    if (!readNonEmptyLine(file, line)) { // ?滻?getline(file, line)
+        cerr << "??????????????" << endl;
         return {};
     }
     istringstream iss4(line);
@@ -319,9 +315,9 @@ ifstream NFA::readNfaUnite(std::ifstream file) {
         original_state.insert(num);
     }
 
-    // 6. 读取终止状态（跳过空行）
-    if (!readNonEmptyLine(file, line)) { // 替换原getline(file, line)
-        cerr << "错误：读取终止状态失败" << endl;
+    // 6. ?????????????????У?
+    if (!readNonEmptyLine(file, line)) { // ?滻?getline(file, line)
+        cerr << "??????????????" << endl;
         return {};
     }
     istringstream iss5(line);

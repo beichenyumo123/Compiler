@@ -102,7 +102,7 @@ void LRAnalysis::analysis(const std::string &input) {
             return;
         }
     }
-    cout<<s<<" "<<c_top<<" acc 接收成功\n";
+    cout<<s<<" "<<c_top<<" acc 接收成功\n\n";
 }
 
 

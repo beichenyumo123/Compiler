@@ -44,10 +44,10 @@ void Grammar::generateFirstSet() {
         for (const auto& production : productions) {
             char left=production.first;
             for (string right : production.second) {
-                //如果右部第一个是终结符
+                //?????????????????
                 if (isTerminal(right[0]) || right[0] == EPSILON_INTERNAL) {
                     if (first_set.count(left)!=0) {
-                        //是否存在
+                        //??????
                         if (first_set[left].insert(right[0]).second) {
                             flag = true;
                         }
@@ -57,11 +57,11 @@ void Grammar::generateFirstSet() {
                         first_set[left]={right[0]};
                     }
                 }
-                //如果右部第一个是非终结符
+                //??????????????????
                 else {
-                    //将右部第一个非终结符的first集合加入左部非终结符的first集合
+                    //??????????????????first????????????????first????
                     flag = addNoEpsilonElementsFromFirstSet(right[0],left);
-                    //是否全部包含ε
+                    //????????????
                     if (allContainsEpsilon(first_set, right,0,right.length()-1)) {
                         if (first_set[left].insert(EPSILON_INTERNAL).second) {
                             flag = true;
@@ -191,7 +191,7 @@ set<char> Grammar::firstSetOfRightContainsEpsilon(const char& left,const std::st
     }
 }
 
-//FollowSet辅助函数
+//FollowSet????????
 bool addFollowAToFollowB(FollowSet& follow_set, const char& source, const char& target) {
     bool flag=false;
     if (follow_set.count(source)!=0) {
@@ -229,7 +229,7 @@ bool Grammar::checkTheNail(const char &left, const std::string &right) {
 
     return flag;
 }
-//将first集合中的非ε元素添加到相映的follow集合中
+//??first???????????????????????follow??????
 bool addNonEpsilonElementsToFollowSet(const char& source,const char& target,FirstSet& first_set, FollowSet& follow_set) {
     bool flag = false;
     for (auto i : first_set[source]) {
@@ -258,9 +258,9 @@ bool Grammar::addFirstSetToFollowSet(const std::string &right) {
     return flag;
 }
 
-//FirstSet辅助函数
+//FirstSet????????
 bool Grammar::addNoEpsilonElementsFromFirstSet(char source, char target) {
-    //返回值表示是否有变化
+    //???????????????
     bool flag=false;
     if (first_set.count(source)!=0) {
         for (char c : first_set[source]) {
@@ -315,35 +315,35 @@ Grammar::Grammar() {
     analysis_table.clear();
 }
 
-//处理 T' -> t 并移除空格
+//???? T' -> t ????????
 static std::string normalizeString(const std::string& raw) {
     std::string noSpaces;
-    // 1. 移除空格
+    // 1. ??????
     for (char c : raw) {
         if (!std::isspace(static_cast<unsigned char>(c))) {
             noSpaces += c;
         }
     }
 
-    // 特殊判断：如果整个右部就是 "ε"，直接返回对应的内部字符
-    // 2. [关键修复] 匹配 GBK 的 Epsilon
+    // ??????????????????????? "??"??????????????????
+    // 2. [??????] ??? GBK ?? Epsilon
     if (noSpaces == GBK_EPSILON) {
-        // 调试确认：一旦匹配成功，这行会打印
+        // ??????????????????????????
         // std::cout << "[Debug] Found GBK Epsilon!" << std::endl;
         return std::string(1, EPSILON_INTERNAL);
     }
 
-    // 2. 处理 T' -> t
+    // 2. ???? T' -> t
     std::string processed;
     for (size_t i = 0; i < noSpaces.length(); ++i) {
-        // 检查 UTF-8 字符边界（防止错误地拆分多字节字符，虽然这里主要处理 ASCII）
-        // 但如果你的输入流把 ε 读成了两个 char，这里比较棘手。
-        // 简单起见，我们假设 ε 作为单独的产生式右部出现，上面 if 已经处理了。
+        // ??? UTF-8 ??????????????????????????????????????? ASCII??
+        // ???????????????? ?? ?????????? char????????????
+        // ?????????????? ?? ????????????????????????? if ??????????
 
-        // 检查 T'
+        // ??? T'
         if (i + 1 < noSpaces.length() && noSpaces[i + 1] == '\'') {
             processed += std::tolower(static_cast<unsigned char>(noSpaces[i]));
-            i++; // 跳过 '
+            i++; // ???? '
         } else {
             processed += noSpaces[i];
         }
@@ -353,35 +353,35 @@ static std::string normalizeString(const std::string& raw) {
 
 static char normalizeChar(const std::string& raw) {
     std::string s = normalizeString(raw);
-    if (s.empty()) return '\0'; // 异常保护
+    if (s.empty()) return '\0'; // ??????
     return s[0];
 }
 
 bool Grammar::readGrammarFromFile(ifstream infile) {
     try {
-        // 1. 非终结符
+        // 1. ??????
         int n; infile >> n;
         for (int i = 0; i < n; ++i) {
             std::string temp; infile >> temp;
             nonTerminalSymbols.push_back(normalizeChar(temp));
         }
 
-        // 2. 终结符
+        // 2. ????
         int m; infile >> m;
         for (int i = 0; i < m; ++i) {
             std::string temp; infile >> temp;
-            // 如果终结符列表中包含 ε，也要映射 (一般终结符列表不包含空串，但在某些定义中可能)
+            // ????????????????? ???????? (???????????????????????????????????????)
             if (temp == EPSILON_STR) {
-                // 通常 ε 不存入 terminalSymbols，因为它不是真实的 token
-                // 但如果你需要，可以 insert(EPSILON_INTERNAL);
+                // ??? ?? ?????? terminalSymbols???????????????? token
+                // ???????????????? insert(EPSILON_INTERNAL);
             } else {
                 terminalSymbols.push_back(temp[0]);
             }
         }
 
-        // 3. 产生式
+        // 3. ?????
         int k; infile >> k;
-        std::string dummy; std::getline(infile, dummy); // 吃掉换行
+        std::string dummy; std::getline(infile, dummy); // ???????
 
         for (int i = 0; i < k; ++i) {
             std::string line;
@@ -391,10 +391,10 @@ bool Grammar::readGrammarFromFile(ifstream infile) {
             std::stringstream ss(line);
             std::string rawLhs, arrow, rawRhs;
             ss >> rawLhs >> arrow;
-            std::getline(ss, rawRhs); // 读取剩余部分
+            std::getline(ss, rawRhs); // ????????
 
             char lhs = normalizeChar(rawLhs);
-            std::string rhs = normalizeString(rawRhs); // 这里会把 "ε" 变成 "@"
+            std::string rhs = normalizeString(rawRhs); // ?????? "??" ??? "@"
 
             productions[lhs].push_back(rhs);
 
@@ -403,7 +403,7 @@ bool Grammar::readGrammarFromFile(ifstream infile) {
             production_map[i] = make_pair(lhs,rhs);
         }
 
-        // 4. 开始符号
+        // 4. ???????
         std::string rawStart; infile >> rawStart;
         startSymbol = normalizeChar(rawStart);
 
@@ -413,20 +413,20 @@ bool Grammar::readGrammarFromFile(ifstream infile) {
 
 
 void Grammar::printGrammar() {
-    cout<<"开始符号："<<startSymbol<<endl;
-    cout<<"非终结符：";
+    cout<<"????????"<<startSymbol<<endl;
+    cout<<"????????";
     for (const char& nt : nonTerminalSymbols) {
         cout<<nt<<" ";
     }
     cout<<endl;
 
-    cout<<"终结符：";
+    cout<<"??????";
     for (const char& t : terminalSymbols) {
         cout<<t<<" ";
     }
     cout<<endl;
 
-    cout<<"产生式："<<endl;
+    cout<<"???????"<<endl;
     for (const auto& i: productions) {
         const auto left = i.first;
         auto rights = i.second;
@@ -445,7 +445,7 @@ void Grammar::printFirstSet() {
         cout<<i.first<<": ";
         for (auto j : i.second) {
             if (j=='@') {
-                cout<<"ε"<<" ";
+                cout<<"??"<<" ";
             }
             else {
                 cout<<j<<" ";
@@ -465,7 +465,7 @@ void Grammar::printFollowSet() {
         cout<<i.first<<": ";
         for (auto j : i.second) {
             if (j=='@') {
-                cout<<"ε"<<" ";
+                cout<<"??"<<" ";
             }
             else {
                 cout<<j<<" ";
@@ -485,14 +485,14 @@ void Grammar::printSelectSet() {
         for (auto j : i.second) {
             cout<<left<<" -> ";
             if (j.first[0]==EPSILON_INTERNAL) {
-                cout<<"ε: ";
+                cout<<"??: ";
             }else {
                 cout<<j.first<<": ";
             }
 
             for (auto k : j.second) {
                 if (k == EPSILON_INTERNAL) {
-                    cout<<"ε ";
+                    cout<<"??";
                 }else {
                     cout<<k<<" ";
                 }
@@ -504,66 +504,63 @@ void Grammar::printSelectSet() {
 //using AnalysisTable = std::unordered_map<char, std::unordered_map<char,int>>
 void Grammar::printAnalysisTable() {
     int columnWidth = 8;
-    // 边界检查：空列/空表
+
     if (terminalSymbols.empty()) {
-        std::cerr << "Error: 终结符集合（列）为空！" << std::endl;
+        std::cerr << "Error" << std::endl;
         return;
     }
     if (analysis_table.empty()) {
-        std::cout << "分析表为空！" << std::endl;
         return;
     }
 
-    // 计算总分隔线长度
+
     int totalLineLen = columnWidth + terminalSymbols.size() * columnWidth;
-    // 打印顶部分隔线
+
     std::cout << std::string(totalLineLen, '-') << std::endl;
 
-    // ========== 步骤1：打印表头 ==========
-    // 第一列是行标识（非终结符列），先空出
+
     std::cout << std::left << std::setw(columnWidth) << " ";
-    // 遍历所有列（终结符）作为表头
+
     for (char colSymbol : terminalSymbols) {
         std::cout << std::left << std::setw(columnWidth) << colSymbol;
     }
     std::cout << std::endl;
 
-    // ========== 步骤2：打印分隔线 ==========
+
     std::cout << std::string(totalLineLen, '-') << std::endl;
 
-    // ========== 步骤3：提取并排序行键（解决unordered_map无序问题） ==========
+
     std::vector<char> rowKeys;
     for (const auto& row : analysis_table) {
         rowKeys.push_back(row.first);
     }
-    std::sort(rowKeys.begin(), rowKeys.end()); // 按字符序排序行
+    std::sort(rowKeys.begin(), rowKeys.end());
 
-    // ========== 步骤4：逐行打印内容 ==========
+
     for (char rowKey : rowKeys) {
-        // 打印行标识（非终结符，左对齐）
+
         std::cout << std::left << std::setw(columnWidth) << rowKey;
 
-        // 直接获取当前行的内层unordered_map（无需转换）
+
         const auto& cellMap = analysis_table.at(rowKey);
 
-        // 遍历每一列，匹配对应值（无值则填空格）
+
         for (char colSymbol : terminalSymbols) {
             auto it = cellMap.find(colSymbol);
             if (it != cellMap.end()) {
-                // 找到值：拼接 "p" + 数字并打印
+
                 std::string valueStr = "p" + std::to_string(it->second);
                 std::cout << std::left << std::setw(columnWidth) << valueStr;
             } else {
-                // 未找到：打印空格占位
+
                 std::cout << std::left << std::setw(columnWidth) << " ";
             }
         }
 
-        // 每行结束换行
+
         std::cout << std::endl;
     }
 
-    // 打印底部分隔线
     std::cout << std::string(totalLineLen, '-') << std::endl;
 }
 
@@ -612,11 +609,11 @@ DFA Grammar::generateDFA() {
     int order = productions_order[std::string(1,startSymbol) + " -> " + *(productions[startSymbol].begin())];
     family.push_back(getEpsilonClosureOfItemSet({std::make_pair(order,0)}));
 
-    std::set<int> states={0};//状态集合
-    std::set<char> chars(terminalSymbols.begin(),terminalSymbols.end());//字母表
+    std::set<int> states={0};//??????
+    std::set<char> chars(terminalSymbols.begin(),terminalSymbols.end());//?????
     chars.insert(nonTerminalSymbols.begin(),nonTerminalSymbols.end());
-    ReflectOfDFA transitions;//映照
-    int original_state = 0; //唯一初态
+    ReflectOfDFA transitions;//???
+    int original_state = 0; //??????
     std::set<int> final_states;
 
 
@@ -660,7 +657,7 @@ void Grammar::generateActionTable() {
         bool s = false;
         for (auto item : family[i]) {
             auto right = production_map[item.first].second;
-            //归约项目
+            //??????
             if (item.second == right.length()) {
                 if (production_map[item.first].first == startSymbol) {
                     action_table[i]['#'] = make_pair('a',-1);
@@ -774,7 +771,7 @@ ItemSet Grammar::getEpsilonClosureOfItemSet(ItemSet item_set) {
             int k = i.second;
             if (k<right.length()) {
                 if (isNonTerminal(right[k])) {
-                    //拿到该非终结符的所有产生式
+                    //??????????????????????
                     stack<char> s;
                     s.push(right[k]);
                     while (!s.empty()) {
@@ -800,5 +797,112 @@ ItemSet Grammar::getEpsilonClosureOfItemSet(ItemSet item_set) {
     return res;
 }
 
+void Grammar:: writeLRTblFile(const std::string& filename) const {
+    // 打开文件（覆盖写入，不存在则创建）
+    std::ofstream out_file(filename, std::ios::out | std::ios::trunc);
+    if (!out_file.is_open()) {
+        throw std::runtime_error("无法打开文件进行写入: " + filename);
+    }
 
+    // ========== 第一步：统计Action表总项数 ==========
+    size_t action_count = 0;
+    for (const auto& state_entry : action_table) {
+        // 累加每个状态下的终结符-动作对数量
+        action_count += state_entry.second.size();
+    }
 
+    // ========== 写入Action表项数 + Action表内容 ==========
+    // 先写入Action表项数（格式：Action表项数: 数字）
+    out_file << action_count << "\n";
+    for (const auto& state_entry : action_table) {
+        int state = state_entry.first;                // 外层key：状态号
+        const auto& symbol_action_map = state_entry.second;  // 内层：终结符->Action
+
+        for (const auto& symbol_action : symbol_action_map) {
+            char symbol = symbol_action.first;        // 终结符（如'(', 'a', '#'）
+            const Action& action = symbol_action.second;  // 动作对
+
+            // 解析 Action 为 lrtbl 格式的字符串
+            std::string action_str;
+            if (action.first == 'a' && action.second == -1) {
+                // {a,-1} 对应 acc（接受）
+                action_str = "acc";
+            } else if (action.first == 's') {
+                // {s, n} 对应 sn（移进至状态n）
+                action_str = "s" + std::to_string(action.second);
+            } else if (action.first == 'r') {
+                // {r, n} 对应 rn（归约产生式n）
+                action_str = "r" + std::to_string(action.second);
+            } else {
+                // 未知动作类型，抛出异常提示
+                throw std::runtime_error(
+                    "未知的Action类型: 状态" + std::to_string(state) +
+                    " 符号'" + symbol + "' 动作(" + action.first + "," +
+                    std::to_string(action.second) + ")");
+            }
+
+            // 按 lrtbl 格式写入：状态 符号 动作
+            out_file << state << " " << symbol << " " << action_str << "\n";
+        }
+    }
+
+    // ========== 第二步：统计GoTo表总项数 ==========
+    size_t goto_count = 0;
+    for (const auto& state_entry : go_to_table) {
+        // 累加每个状态下的非终结符-转移状态对数量
+        goto_count += state_entry.second.size();
+    }
+
+    // ========== 写入GoTo表项数 + GoTo表内容 ==========
+    // 先写入GoTo表项数（格式：GoTo表项数: 数字）
+    out_file << goto_count << "\n";
+    for (const auto& state_entry : go_to_table) {
+        int state = state_entry.first;                // 外层key：状态号
+        const auto& symbol_nextstate_map = state_entry.second;  // 内层：非终结符->转移状态
+
+        for (const auto& symbol_nextstate : symbol_nextstate_map) {
+            char symbol = symbol_nextstate.first;     // 非终结符（如'S', 'E'）
+            int next_state = symbol_nextstate.second; // 转移后的状态
+
+            // 按 lrtbl 格式写入：状态 符号 转移状态
+            out_file << state << " " << symbol << " " << next_state << "\n";
+        }
+    }
+
+    // 检查写入是否成功
+    if (out_file.bad()) {
+        out_file.close();
+        throw std::runtime_error("文件写入过程中发生错误: " + filename);
+    }
+
+    // 关闭文件
+    out_file.close();
+    std::cout << "lrtbl 文件生成成功：" << filename << std::endl;
+}
+
+// 替换文件路径的扩展名为.lrtbl
+std::string replaceExtensionToLrtbl(const std::string& filePath) {
+    // 找到最后一个目录分隔符的位置（处理 / 和 \ 两种分隔符）
+    size_t lastSeparator = filePath.find_last_of("/\\");
+    // 找到最后一个 . 的位置
+    size_t lastDot = filePath.find_last_of('.');
+
+    // 确保 . 出现在最后一个目录分隔符之后（是文件名的扩展名，而非目录名中的 .）
+    if (lastDot != std::string::npos && lastDot > lastSeparator) {
+        // 截断到 . 的位置，拼接 .lrtbl
+        return filePath.substr(0, lastDot) + ".lrtbl";
+    } else {
+        // 没有找到有效的扩展名，直接在末尾添加 .lrtbl
+        return filePath + ".lrtbl";
+    }
+}
+
+void Grammar::writeActionAndGoToTable(const std::string& filePath){
+    if (action_table.empty()) {
+        generateActionTable();
+    }
+    if (go_to_table.empty()) {
+        generateGoToTable();
+    }
+    writeLRTblFile(replaceExtensionToLrtbl(filePath));
+}
