@@ -53,7 +53,7 @@ void Experiment::experiment2() {
     std::cout<<"----------DFA最小化----------\n"<<std::endl;
     d.printDFA();
     std::cout<<"\n----------Experiment2 END----------\n";
-    //system("pause");
+    system("pause");
 }
 
 //a(b|c)*d
@@ -78,7 +78,7 @@ void Experiment::experiment3() {
     DFA dfa=nfa.determineNFA().minimizeDFA();
     dfa.printDFA();
     std::cout<<"\n----------Experiment3 END----------\n";
-    //system("pause");
+    system("pause");
 }
 //D:\Clion\Compiler\data\GrammarTest.txt
 void Experiment::experiment5() {
@@ -92,6 +92,7 @@ void Experiment::experiment5() {
     grammar.printSelectSet();
     //grammar.printProductionsOrder();
     std::cout<<"\n----------Experiment5 END----------\n";
+    system("pause");
 }
 //D:\Clion\Compiler\data\Grammar.txt
 //D:\Clion\Compiler\data\SymbolString.txt
@@ -113,6 +114,7 @@ void Experiment::experiment6() {
     predictive_analysis.analysis(s);
 
     std::cout<<"\n----------Experiment6 END----------\n";
+    system("pause");
 }
 //D:\Clion\Compiler\data\exp7.txt
 void Experiment::experiment7() {
@@ -138,6 +140,7 @@ void Experiment::experiment7() {
         std::cout<<"不是LR0文法\n";
     }
     std::cout<<"\n----------Experiment7 END----------\n";
+    system("pause");
 }
 
 //D:\Clion\Compiler\data\LRAnalysis.txt
@@ -169,6 +172,7 @@ void Experiment::experiment9() {
     }
 
     std::cout<<"\n----------Experiment9 END----------\n";
+    system("pause");
 }
 
 // 去除字符串中所有空白字符（空格、\t、\n、\r等）
